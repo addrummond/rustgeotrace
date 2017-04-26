@@ -181,8 +181,6 @@ where SI: 'a + Copy
 }
 
 fn ray_intersects_segment(ray: &Ray, segment: &Segment) -> Option<Point2> {
-    //println!("TESTINTER RAY {} {} {} {}", segment.p1.coords[0],segment.p1.coords[1],segment.p2.coords[0],segment.p2.coords[1]);
-
     let ray_slope_num = ray.p2.coords[1] - ray.p1.coords[1];
     let seg_slope_num = segment.p2.coords[1] - segment.p1.coords[1];
     let ray_slope_denom = ray.p2.coords[0] - ray.p1.coords[0];
@@ -234,8 +232,6 @@ fn ray_intersects_segment(ray: &Ray, segment: &Segment) -> Option<Point2> {
         y = (seg_k*ray_slope - ray_k*seg_slope) / (ray_slope - seg_slope);
     }
 
-    //println!("CALC: {} {}", x, y);
-
     // Is the intersection point on the ray?
     if ray_slope_num > 0.0 && y < ray.p1.coords[1]
         { return None; }
@@ -255,7 +251,6 @@ fn ray_intersects_segment(ray: &Ray, segment: &Segment) -> Option<Point2> {
         return Some(Point2::new(x, y));
     }
     else {
-        //println!("ULTIFAIL {} {} {} {}", segment.p1.coords[0], segment.p1.coords[1], segment.p2.coords[0], segment.p2.coords[1]);
         return None;
     }
 }
@@ -347,17 +342,14 @@ where SI: 'a + Copy {
                 let mut quad_mask = 1 << get_point_quad(self.ray.p1, *center);
 
                 if self.ray.p1.coords[1] != self.ray.p2.coords[1] {
-                    //println!("FIRST TEST {} {} {}", child_info.center.coords[1], k, m);
                     let x_intercept = (child_info.center.coords[1] - self.ray_k) / self.ray_m;
                     let s1 = self.ray.p2.coords[1] - self.ray.p1.coords[1] >= 0.0;
                     let s2 = child_info.center.coords[1] - self.ray.p1.coords[1] >= 0.0;
-                    //println!("CRUCIAL {} {} {}", s1, s2, x_intercept);
                     if s1 == s2 {
                         if x_intercept > child_info.center.coords[0] {
                             quad_mask |= 0b0110;
                         }
                         else {
-                            //println!("OH!");
                             quad_mask |= 0b1001;
                         }
                     }
@@ -367,7 +359,6 @@ where SI: 'a + Copy {
                     let y_intercept = (self.ray_m * child_info.center.coords[0]) + self.ray_k;
                     let s1 = self.ray.p2.coords[0] - self.ray.p1.coords[0] >= 0.0;
                     let s2 = child_info.center.coords[0] - self.ray.p1.coords[0] >= 0.0;
-                    //println!("SECOND TEST {} {} {}", y_intercept, s1, s2);
                     if s1 == s2 {
                         if y_intercept > child_info.center.coords[1] {
                             quad_mask |= 0b0011;
@@ -380,7 +371,6 @@ where SI: 'a + Copy {
 
                 for i in 0..4 {
                     if quad_mask & (1 << i) != 0 {
-                        //println!("PUSHING [{}] {}", quad_mask, i);
                         self.stack.push((false,&(child_info.children[i])));
                     }
                 }
@@ -476,7 +466,9 @@ where SI: 'a + Copy {
             { return; }
 
         // Not possible to initialize an array in Rust using a loop in safe code.
-        fn mk<'a, SI: Copy>() -> Box<QTreeNode<'a, SI>> { Box::new(QTreeNode { segments: vec![ ], child_info: None }) }
+        fn mk<'a, SI: Copy>() -> Box<QTreeNode<'a, SI>> {
+            Box::new(QTreeNode { segments: vec![ ], child_info: None })
+        }
         let mut new_children: [Box<QTreeNode<'a,SI>>; 4] = [
             mk(), mk(), mk(), mk()
         ];
@@ -625,12 +617,12 @@ where SI: 'a + Copy {
         });
 
         // Skip any initial zero intercepts.
-        let it = intersects.iter().skip_while(|&&(_,_,_,d)| d - EPSILON < 0.0);
+        let it = intersects.into_iter().skip_while(|&(_,_,_,d)| d - EPSILON < 0.0);
         
         let mut last_d: Scalar = 0.0;
         let mut last_pt: Point2 = Point2::new(0.0, 0.0);
         let mut rs: Vec<(&'a Segment, SI)> = Vec::new();
-        for &(s, si, pt, d) in it {
+        for (s, si, pt, d) in it {
             if last_d == 0.0 || d == last_d {
                 last_d = d;
                 last_pt = pt;
@@ -647,7 +639,6 @@ where SI: 'a + Copy {
         else {
             let pt = last_pt;
             let d = last_d;
-            //println!("INTERSECT {} {} FROM {} {} at {}", pt.coords[0], pt.coords[1], ray.p1.coords[0], ray.p1.coords[1], d);
             Some((rs, pt, d))
         }
     }
