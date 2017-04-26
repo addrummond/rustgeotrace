@@ -1,5 +1,5 @@
 //! This module provides utilities for implementing recursive
-//! descent parsers. It's offers a sort of halfway house between
+//! descent parsers. It offers a sort of halfway house between
 //! using a true parser combinator library and writing a recursive
 //! descent parser from scratch. It provides a standard type for
 //! parsers, `Parser<T>`, a few basic parsers such as parsers for
