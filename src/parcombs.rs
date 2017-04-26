@@ -279,7 +279,7 @@ pub fn expect_str(st: &mut ParseState, expected: &str) -> ParseResult<()> {
 /// initiated by the supplied comment char, and returns the last char
 /// skipped, if any, together with the number of chars skipped.
 /// The `include_nl` parameters determines whether or not newlines ('\n')
-/// count as whitespace. To skip whitespace without parsing comments
+/// count as whitespace. To skip whitespace without detecting comments
 /// use `skip_while` with a suitable predicate.
 pub fn skip_space_wc(st: &mut ParseState, comment_char: char, include_nl: bool) ->
 ParseResult<(Option<char>, usize)> {
